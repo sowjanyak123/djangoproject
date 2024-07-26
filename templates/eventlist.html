@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event List</title>
+    <style>
+        .event-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .event-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            width: 300px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .event-card img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+        .event-title {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        .event-description {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Event List</h1>
+    <div class="event-container">
+        {% for event in events %}
+        <div class="event-card">
+            <h2 class="event-title">{{ event.title }}</h2>            
+            {% if event.image %}
+            <img src="{{ event.image.url }}" alt="Event Image">
+            {% endif %}
+            <p class="event-description">{{ event.description }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
