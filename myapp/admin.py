@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Blog, Event
+from .models import Blog, Event,EventImage
 from ckeditor.widgets import CKEditorWidget # type: ignore
 from django.db import models
 
@@ -12,3 +12,4 @@ class BlogAdmin(admin.ModelAdmin):
 
 admin.site.register(Blog, BlogAdmin)
 admin.site.register(Event)
+admin.site.register(EventImage)

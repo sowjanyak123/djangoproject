@@ -17,16 +17,46 @@
             width: 300px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        .event-card img {
-            max-width: 100%;
-            border-radius: 8px;
-        }
         .event-title {
             font-size: 1.5em;
             margin-bottom: 10px;
         }
         .event-description {
             margin-bottom: 10px;
+        }
+        .slider {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+        .slides {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+        .slide {
+            min-width: 100%;
+            box-sizing: border-box;
+        }
+        .slider img {
+            width: 100%;
+            display: block;
+            border-radius: 8px;
+        }
+        .nav-buttons {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            transform: translateY(-50%);
+        }
+        .nav-buttons button {
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -35,13 +65,38 @@
     <div class="event-container">
         {% for event in events %}
         <div class="event-card">
-            <h2 class="event-title">{{ event.title }}</h2>            
-            {% if event.image %}
-            <img src="{{ event.image.url }}" alt="Event Image">
-            {% endif %}
+            <h2 class="event-title">{{ event.title }}</h2>
+            <div class="slider" id="slider-{{ event.id }}">
+                <div class="slides">
+                    {% for image in event.images.all %}
+                    <div class="slide">
+                        <img src="{{ image.image.url }}" alt="Event Image">
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="nav-buttons">
+                    <button onclick="prevSlide({{ event.id }})">&lt;</button>
+                    <button onclick="nextSlide({{ event.id }})">&gt;</button>
+                </div>
+            </div>
             <p class="event-description">{{ event.description }}</p>
         </div>
         {% endfor %}
     </div>
+
+    <script>
+        function nextSlide(eventId) {
+            const slider = document.getElementById(`slider-${eventId}`);
+            const slides = slider.querySelector('.slides');
+            const slideWidth = slider.offsetWidth;
+            slides.style.transform = `translateX(-${slideWidth}px)`;
+        }
+
+        function prevSlide(eventId) {
+            const slider = document.getElementById(`slider-${eventId}`);
+            const slides = slider.querySelector('.slides');
+            slides.style.transform = `translateX(0)`;
+        }
+    </script>
 </body>
 </html>

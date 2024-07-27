@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Blog,Event
+from .models import Blog,Event,EventImage
 # Create your views here.
 
 def create_blog(request):
@@ -8,7 +8,12 @@ def create_blog(request):
         title = request.POST.get('title')
         image = request.FILES.get('image')
         description = request.POST.get('description')
-        
+
+        # Check for duplicate title
+        if Blog.objects.filter(title=title).exists():
+            messages.error(request, "A blog with this title already exists.")
+            return redirect('dashboard')
+
         # Save the blog post
         Blog.objects.create(title=title, image=image, description=description)
         return redirect('dashboard')  # Redirect to a success page or the blog list
@@ -36,33 +41,53 @@ def edit_blog(request,pk):
 def delete_blog(request,pk):
     blog=get_object_or_404(Blog, pk=pk)
     blog.delete()
-    return redirect('blog_item')
+    return redirect('dashboard')
 
 
 def create_event(request):
     if request.method == 'POST':
         title = request.POST.get('title')
         description = request.POST.get('description')
-        image = request.FILES.get('image')
-        
-        Event.objects.create(title=title, description=description,image=image)
-        return redirect('dashboard')
-    return render(request, 'addevent.html')
+        images = request.FILES.getlist('images[]')  # Get list of uploaded images
 
+        # Check if an event with the same title already exists
+        if Event.objects.filter(title=title).exists():
+            messages.error(request, "An event with this title already exists.")
+            return redirect('dashboard')
+
+        # Create the Event object first
+        event = Event.objects.create(title=title, description=description)
+
+        # Create EventImage objects for each uploaded image
+        for image in images:
+            EventImage.objects.create(event=event, image=image)
+
+        messages.success(request, 'Event created successfully')
+        return redirect('dashboard')
+
+    return render(request, 'dashboard.html')
 def event_list(request):
     events = Event.objects.all()
     return render(request, 'eventlist.html', {'events': events})
 
-def edit_event(request,id):
-    event=get_object_or_404(Event, id=id)
+def edit_event(request, id):
+    event = get_object_or_404(Event, id=id)
+
     if request.method == 'POST':
         event.title = request.POST.get('title')
-        new_image = request.FILES.get('image')
-        if new_image:
-            event.image = new_image
-        
         event.description = request.POST.get('description')
         event.save()
+
+        # Handle removal of images
+        remove_images = request.POST.getlist('remove_images')
+        if remove_images:
+            EventImage.objects.filter(id__in=remove_images).delete()
+
+        # Handle new image uploads
+        images = request.FILES.getlist('images[]')
+        for image in images:
+            EventImage.objects.create(event=event, image=image)
+
         return redirect('dashboard')
     
     return render(request, 'editevent.html', {'event': event})
